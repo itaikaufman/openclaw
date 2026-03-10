@@ -26,22 +26,34 @@ OPENCLAW_TEST_PROFILE=low OPENCLAW_TEST_SERIAL_GATEWAY=1 pnpm test
 
 This fork builds two images:
 
-**`openclaw:local`** — standard image:
+**`openclaw:local`** — standard image, built from the multi-stage `Dockerfile`:
 ```bash
 docker build -t openclaw:local .
+# Slim variant (smaller, bookworm-slim base):
+docker build --build-arg OPENCLAW_VARIANT=slim -t openclaw:local-slim .
 ```
 
-**`openclaw:readers`** — extends local with Python document libraries (docx, pdf, xlsx, pptx, pptx, bs4):
+**`openclaw:readers`** — extends `openclaw:local` with Python document libraries (docx, pdf, xlsx, pptx, bs4):
 ```bash
 docker build -t openclaw:local .
 docker build -f Dockerfile.readers --build-arg OPENCLAW_IMAGE=openclaw:local -t openclaw:readers .
 ```
 
-`docker-compose.yml` uses `openclaw:readers`. Additional env vars (all optional with empty defaults):
+`docker-compose.yml` defaults to `openclaw:readers` (`OPENCLAW_IMAGE` overrides it). Additional env vars (all optional with empty defaults):
 - `GOG_KEYRING_PASSWORD` — gogcli keyring password
 - `GOGCLI_CONFIG_DIR` — host path to gogcli config dir (defaults to `~/.config/gogcli`)
 
-`gogcli` v0.11.0 is installed in the main `Dockerfile` at `/usr/local/bin/gog` for GOG.com library access.
+### Dockerfile multi-stage structure
+
+| Stage | Purpose |
+|---|---|
+| `ext-deps` | Extracts `package.json` from opted-in extensions; isolated to avoid cache busting on source changes |
+| `build` | Installs Bun + pnpm, compiles TypeScript + UI; heavyweight, never ships |
+| `runtime-assets` | Prunes dev deps and strips `.d.ts`/`.map` files from `build` |
+| `base-default` / `base-slim` | Selectable runtime base (full bookworm or bookworm-slim) |
+| **runtime** (final) | Fresh base — copies only pruned assets; installs system tools, Docker CLI (optional), and gogcli |
+
+`gogcli` v0.11.0 is installed in the **runtime stage** at `/usr/local/bin/gog` (lines 205–223), after `curl` is available and before `USER node`. Version and sha256 hashes are parameterised as `ARG` values — update them together when bumping.
 
 ## Code Architecture
 
