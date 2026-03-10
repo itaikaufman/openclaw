@@ -202,6 +202,26 @@ RUN --mount=type=cache,id=openclaw-bookworm-apt-cache,target=/var/cache/apt,shar
         docker-ce-cli docker-compose-plugin; \
     fi
 
+# Install gogcli for GOG.com library access.
+# Update GOGCLI_VERSION and matching SHA256 hashes when bumping (from checksums.txt in the release).
+ARG TARGETARCH
+ARG GOGCLI_VERSION="0.11.0"
+ARG GOGCLI_SHA256_AMD64="ca98ba56e29ccd3713fe7bf835fdca00ae1b97cdcb7b0bc5e393e7edb4089c84"
+ARG GOGCLI_SHA256_ARM64="1bfe980545641501488fed93c66fc76671c72a4605285f574572dac700efdd35"
+RUN set -eux; \
+    arch="${TARGETARCH:-amd64}"; \
+    case "$arch" in \
+      amd64) gog_arch="amd64"; expected_sha256="${GOGCLI_SHA256_AMD64}" ;; \
+      arm64) gog_arch="arm64"; expected_sha256="${GOGCLI_SHA256_ARM64}" ;; \
+      *) echo "Unsupported arch: $arch" >&2; exit 1 ;; \
+    esac; \
+    cd /tmp; \
+    curl -fL "https://github.com/steipete/gogcli/releases/download/v${GOGCLI_VERSION}/gogcli_${GOGCLI_VERSION}_linux_${gog_arch}.tar.gz" -o gogcli.tgz; \
+    echo "${expected_sha256}  gogcli.tgz" | sha256sum -c -; \
+    tar -xzf gogcli.tgz; \
+    install -m 0755 gog /usr/local/bin/gog; \
+    rm -rf /tmp/gog /tmp/gogcli.tgz
+
 # Expose the CLI binary without requiring npm global writes as non-root.
 RUN ln -sf /app/openclaw.mjs /usr/local/bin/openclaw \
  && chmod 755 /app/openclaw.mjs
