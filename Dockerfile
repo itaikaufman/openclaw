@@ -205,9 +205,9 @@ RUN --mount=type=cache,id=openclaw-bookworm-apt-cache,target=/var/cache/apt,shar
 # Install gogcli for GOG.com library access.
 # Update GOGCLI_VERSION and matching SHA256 hashes when bumping (from checksums.txt in the release).
 ARG TARGETARCH
-ARG GOGCLI_VERSION="0.11.0"
-ARG GOGCLI_SHA256_AMD64="ca98ba56e29ccd3713fe7bf835fdca00ae1b97cdcb7b0bc5e393e7edb4089c84"
-ARG GOGCLI_SHA256_ARM64="1bfe980545641501488fed93c66fc76671c72a4605285f574572dac700efdd35"
+ARG GOGCLI_VERSION="0.12.0"
+ARG GOGCLI_SHA256_AMD64="a03fccbd67ea2e59a26a56e92de8918577f4bebe4b2f946823419777827cdab2"
+ARG GOGCLI_SHA256_ARM64="d7f20494d7eb0e8716631853d055ccbb368c7b81cb8165f55b45884bccb67b4b"
 RUN set -eux; \
     arch="${TARGETARCH:-amd64}"; \
     case "$arch" in \
