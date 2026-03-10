@@ -14,6 +14,7 @@ services:
       - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
       - ${GOGCLI_CONFIG_DIR:-${HOME}/.config/gogcli}:/home/node/.config/gogcli
+      - ${HOME}/.cache/ms-playwright:/home/node/.cache/ms-playwright
       ## Uncomment the lines below to enable sandbox isolation
       ## (agents.defaults.sandbox). Requires Docker CLI in the image
       ## (build with --build-arg OPENCLAW_INSTALL_DOCKER_CLI=1) or use
@@ -72,6 +73,7 @@ services:
       - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
       - ${GOGCLI_CONFIG_DIR:-${HOME}/.config/gogcli}:/home/node/.config/gogcli
+      - ${HOME}/.cache/ms-playwright:/home/node/.cache/ms-playwright
     stdin_open: true
     tty: true
     init: true
